@@ -1,0 +1,19 @@
+[project]
+name = "detection-eval"
+version = "0.1.0"
+description = "Object detection evaluation from scratch: IoU, NMS, COCO mAP and error analysis, verified against pycocotools."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "Numan Bekir Özçelik" }]
+dependencies = ["numpy>=1.24"]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
