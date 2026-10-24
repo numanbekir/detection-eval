@@ -10,6 +10,7 @@ dependencies = ["numpy>=1.24"]
 
 [dependency-groups]
 dev = ["pytest>=8"]
+train = ["ultralytics==8.4.175"]
 
 [build-system]
 requires = ["hatchling"]
