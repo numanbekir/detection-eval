@@ -88,6 +88,30 @@ From the Ultralytics 8.4.175 source:
 - **Not the cause:** detection limits. pycocotools keeps 100 detections per image and class;
   raising it to 1000 changes mAP50 at 640 from 0.347 to 0.348.
 
+### Without Ultralytics: ONNX Runtime
+
+The same weights exported to ONNX and run with ONNX Runtime. Everything around the model is
+this repo's own code: letterbox, decoding the raw `(1, 14, 8400)` output, class-aware NMS
+(`decode.py`, `nms.py`). Settings as in Ultralytics: score ≥ 0.001, NMS IoU 0.7, at most 300
+detections per image. mAP50, pycocotools:
+
+| | Ultralytics predict | ONNX Runtime + this repo | difference |
+|---|---|---|---|
+| 640, val | 0.347 | 0.355 | +0.008 |
+| 640, test-dev | 0.288 | 0.294 | +0.006 |
+| 1280, val | 0.503 | 0.505 | +0.002 |
+
+The whole difference comes from how the image is shrunk to the input size. Ultralytics uses
+OpenCV `INTER_LINEAR` (in training too), which reads only a few source pixels for every new
+pixel. This repo uses Pillow bilinear, which averages over all the source pixels it replaces.
+With OpenCV `INTER_LINEAR` in the same ONNX pipeline, 640 val drops back to 0.347
+(`INTER_AREA`: 0.354), so NMS and decoding match Ultralytics. At 1280 the image is only scaled
+to 0.94 and the gain almost disappears. At 640 the gain is spread over all object sizes, not
+only small ones.
+
+CPU time per image (i7-11800H, ONNX Runtime): 49 ms model / 73 ms in total at 640,
+264 ms / 303 ms at 1280.
+
 ## How It Works
 
 ```
@@ -97,11 +121,15 @@ src/detection_eval/
   ap.py         precision-recall curve, AP (all points and COCO 101-point), mAP
   coco.py       YOLO labels and detections -> COCO JSON
   evaluate.py   COCO-style mAP50 per class from the pieces above
+  decode.py     letterbox, raw YOLO output -> boxes, back to original pixels
+  nms.py        NMS and class-aware NMS
 scripts/
   train.py         train YOLO11 on VisDrone (Ultralytics)
   predict_coco.py  run a model on a split, save detections as COCO results JSON
   eval_coco.py     ground truth from YOLO labels, pycocotools and this repo side by side
   draw_matches.py  draw TP / FP / missed boxes on one image
+  inspect_onnx.py  input / output shapes and raw candidates of an ONNX model
+  predict_onnx.py  ONNX Runtime + decode.py + nms.py, COCO results JSON without Ultralytics
 ```
 
 Per class, the same steps as pycocotools: in each image sort detections by score (stable sort,
@@ -115,7 +143,7 @@ Requires [uv](https://docs.astral.sh/uv/).
 
 ```bash
 uv sync                  # numpy, pillow, pyyaml + pycocotools, pytest
-uv run pytest -q         # 74 tests
+uv run pytest -q         # 100 tests
 ```
 
 Training and prediction need Ultralytics (`uv sync --group train`). The dataset is not included:
@@ -133,6 +161,15 @@ uv run python scripts/draw_matches.py --run runs/coco_eval/yolo11s_640_val
 
 For test-dev, add `--images data/VisDrone/images/test` to `predict_coco.py` and `--split test`
 to `eval_coco.py`.
+
+Without Ultralytics at prediction time (`uv sync --group onnx` for ONNX Runtime; the export
+itself needs Ultralytics):
+
+```bash
+yolo export model=runs/visdrone_yolo11s_640_baseline/weights/best.pt format=onnx imgsz=640
+uv run python scripts/predict_onnx.py --model runs/visdrone_yolo11s_640_baseline/weights/best.onnx \
+    --out runs/coco_eval/yolo11s_640_onnx_val/detections.json
+```
 
 Training settings: YOLO11s from COCO-pretrained weights, 50 epochs, seed 0, batch 16 at 640 and
 4 at 1280 (`nbs=64` keeps the update size the same), RTX 3060 Laptop 6 GB: about 1 h 50 min and
