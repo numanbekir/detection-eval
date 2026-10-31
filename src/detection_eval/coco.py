@@ -21,11 +21,6 @@ def yolo_line_to_coco(line, img_w, img_h):
 
     Example: "3 0.5 0.5 0.2 0.4" in a 100 x 50 image -> (4, [40.0, 15.0, 20.0, 20.0]).
     """
-    # 1. Split the line into its five parts. The first one is the class (int),
-    #    the other four are cx, cy, w, h (float, 0-1).
-    # 2. Scale to pixels: widths and x go with img_w, heights and y with img_h.
-    # 3. Move from the centre to the top-left corner.
-    # 4. Return (class + 1, [x, y, w, h]).
     parts = line.split()
     cls = int(parts[0])
     cx, cy, w, h = (float(v) for v in parts[1:5])
@@ -51,13 +46,6 @@ def labels_to_coco(images, class_names):
         Image ids and annotation ids start at 1. Annotation ids keep counting
         across images. Every image is listed, even one without labels.
     """
-    # 1. Walk over the images with enumerate(..., start=1): that gives the image id.
-    #    Add one dict to the images list for every image, labels or not.
-    # 2. For every non-blank line, call yolo_line_to_coco and add one dict to
-    #    the annotations list. The annotation id is a counter that starts at 1
-    #    and is NOT reset for each image.
-    # 3. One category dict per class name: {"id": index + 1, "name": name}.
-    # 4. Return the three lists in one dict.
     coco_images = []
     annotations = []
     ann_id = 1  # keeps counting across images, never reset
@@ -99,14 +87,10 @@ def detections_to_coco(image_id, boxes_xyxy, scores, classes):
         A list of N dicts: {"image_id", "category_id", "bbox": [x, y, w, h], "score"}.
         Values are plain Python int/float so json.dump can write them.
     """
-    # 1. Loop with an index i over range(len(scores)).
-    # 2. Unpack boxes_xyxy[i] into x1, y1, x2, y2 and turn it into [x, y, w, h].
-    # 3. Wrap every value in int(...) or float(...): NumPy numbers cannot be
-    #    written to JSON.
     results = []
     for i in range(len(scores)):
         x1, y1, x2, y2 = boxes_xyxy[i]
-        results.append({
+        results.append({  # plain int/float: json.dump cannot write NumPy numbers
             "image_id": int(image_id),
             "category_id": int(classes[i]) + 1,
             "bbox": [float(x1), float(y1), float(x2 - x1), float(y2 - y1)],
@@ -115,7 +99,7 @@ def detections_to_coco(image_id, boxes_xyxy, scores, classes):
     return results
 
 
-# ---- file helpers (ready-made) ---------------------------------------------
+# ---- file helpers -----------------------------------------------------------
 
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".bmp"}
 

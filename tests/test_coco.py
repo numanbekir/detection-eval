@@ -154,7 +154,7 @@ def test_detections_are_json_serialisable():
     assert type(out[0]["score"]) is float
 
 
-# ---- read_yolo_dataset (ready-made helper) ----------------------------------
+# ---- read_yolo_dataset ------------------------------------------------------
 
 def test_read_yolo_dataset(tmp_path):
     from PIL import Image
