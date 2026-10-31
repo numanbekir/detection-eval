@@ -6,10 +6,16 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 authors = [{ name = "Numan Bekir Özçelik" }]
-dependencies = ["numpy>=1.24"]
+dependencies = [
+    "numpy>=1.24",
+    "pillow>=12.3.0",
+]
 
 [dependency-groups]
-dev = ["pytest>=8"]
+dev = [
+    "pycocotools>=2.0.11",
+    "pytest>=8",
+]
 train = ["ultralytics==8.4.175"]
 
 [build-system]
