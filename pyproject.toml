@@ -9,6 +9,7 @@ authors = [{ name = "Numan Bekir Özçelik" }]
 dependencies = [
     "numpy>=1.24",
     "pillow>=12.3.0",
+    "pyyaml>=6.0.3",
 ]
 
 [dependency-groups]
