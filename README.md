@@ -8,7 +8,7 @@ and checked against pycocotools, then used to answer one question on a real mode
 The model is YOLO11s trained on [VisDrone2019-DET](https://github.com/VisDrone/VisDrone-Dataset)
 (drone images, 10 classes, many objects under 32 pixels) at 640 and 1280. Training, ONNX Runtime
 inference and the full results per class and object size are in
-[aerial-object-detection](https://github.com/numanbekir/aerial-object-detection), which uses this
+[aerial-object-detection](https://github.com/tanirim/aerial-object-detection), which uses this
 repo for every number it reports.
 
 ## Results
