@@ -18,34 +18,13 @@ import json
 import sys
 from pathlib import Path
 
-import yaml
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
-from detection_eval.coco import labels_to_coco, read_yolo_dataset, save_json  # noqa: E402
+from detection_eval.coco import labels_to_coco, read_data_yaml, read_yolo_dataset, save_json  # noqa: E402
 from detection_eval.evaluate import coco_map50  # noqa: E402
-
-
-def read_data_yaml(path, split):
-    """Class names and the image/label folders of one split from an Ultralytics data YAML."""
-    path = Path(path)
-    cfg = yaml.safe_load(path.read_text())
-
-    names = cfg["names"]
-    if isinstance(names, dict):  # {0: "pedestrian", 1: "people", ...}
-        names = [names[k] for k in sorted(names)]
-
-    root = Path(cfg.get("path", "."))
-    if not root.is_absolute():
-        root = path.parent / root
-    images = root / cfg[split]
-    # Ultralytics rule: the labels folder is the images folder with "images" -> "labels"
-    parts = list(images.parts)
-    i = len(parts) - 1 - parts[::-1].index("images")
-    parts[i] = "labels"
-    return names, images, Path(*parts)
 
 
 parser = argparse.ArgumentParser(description="pycocotools evaluation of YOLO detections.")

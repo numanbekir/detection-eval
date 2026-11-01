@@ -1,5 +1,7 @@
 # detection-eval
 
+English · [Türkçe](README.tr.md)
+
 Object detection evaluation written from scratch (IoU, matching, AP, COCO-style mAP, NMS)
 and checked against pycocotools, then used to answer one question on a real model:
 
@@ -51,13 +53,16 @@ From the Ultralytics 8.4.175 source:
 - **Not the cause:** detection limits. pycocotools keeps 100 detections per image and class;
   raising it to 1000 changes mAP50 at 640 from 0.347 to 0.348.
 
-### One Image
+### Precision-Recall Curves
 
-![True positives, false positives and missed objects at 640 and 1280](docs/matches_640_vs_1280.jpg)
+![Precision-recall curves of car and bicycle: this repo and pycocotools](docs/pr_curve.png)
 
-`scripts/draw_matches.py` on part of val image `0000295_02400_d_0000033` (317 objects),
-detections with score ≥ 0.3, IoU ≥ 0.5. Green: true positive, red: false positive, orange: missed.
-Counts are for the whole image.
+Val, imgsz 640, IoU 0.50. Blue: the precision envelope from this repo; orange: the precision
+pycocotools stores at its 101 recall thresholds (every 5th shown). Every orange point sits on
+the blue line. Past the highest recall the model reaches (0.85 for car, 0.32 for bicycle),
+pycocotools counts precision as 0. For bicycle that is two thirds of the 101 points, on top of
+a precision that falls below 0.6 within the first 5% of recall. Drawn with
+`scripts/plot_pr_curve.py`.
 
 ## How It Works
 
@@ -70,8 +75,9 @@ src/detection_eval/
   evaluate.py   COCO-style mAP50 per class from the pieces above
   nms.py        NMS and class-aware NMS
 scripts/
-  eval_coco.py     ground truth from YOLO labels, pycocotools and this repo side by side
-  draw_matches.py  draw TP / FP / missed boxes on one image
+  eval_coco.py       ground truth from YOLO labels, pycocotools and this repo side by side
+  plot_pr_curve.py   precision-recall curves, this repo and pycocotools on one plot
+  draw_matches.py    draw TP / FP / missed boxes on one image
 ```
 
 Per class, the same steps as pycocotools: in each image sort detections by score (stable sort,
@@ -98,7 +104,14 @@ uv run python scripts/draw_matches.py --run runs/yolo11s_640_val --images data/V
 ```
 
 `eval_coco.py` writes `ground_truth.json` next to the detections; add `--split test` for another
-split. As a library:
+split. The plot needs matplotlib (`uv sync --group plot`):
+
+```bash
+uv run --group plot python scripts/plot_pr_curve.py --data data/VisDrone.yaml \
+    --detections runs/yolo11s_640_val/detections.json --classes car bicycle --out docs/pr_curve.png
+```
+
+As a library:
 
 ```python
 from detection_eval.coco import labels_to_coco, read_yolo_dataset

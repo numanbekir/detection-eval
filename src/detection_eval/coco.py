@@ -123,6 +123,28 @@ def read_yolo_dataset(images_dir, labels_dir):
     return images
 
 
+def read_data_yaml(path, split):
+    """(class names, image folder, label folder) of one split of an Ultralytics data YAML."""
+    import yaml
+
+    path = Path(path)
+    cfg = yaml.safe_load(path.read_text())
+
+    names = cfg["names"]
+    if isinstance(names, dict):  # {0: "pedestrian", 1: "people", ...}
+        names = [names[k] for k in sorted(names)]
+
+    root = Path(cfg.get("path", "."))
+    if not root.is_absolute():
+        root = path.parent / root
+    images = root / cfg[split]
+    # Ultralytics rule: the labels folder is the images folder with "images" -> "labels"
+    parts = list(images.parts)
+    i = len(parts) - 1 - parts[::-1].index("images")
+    parts[i] = "labels"
+    return names, images, Path(*parts)
+
+
 def save_json(obj, path):
     """Write obj as JSON, creating the parent folder if needed."""
     path = Path(path)
