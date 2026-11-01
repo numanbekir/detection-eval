@@ -8,8 +8,8 @@ Class names and image/label folders come from the Ultralytics data YAML, so the
 same script works for any YOLO-format dataset.
 
 Usage:
-    python scripts/eval_coco.py --detections runs/coco_eval/yolo11s_640_val/detections.json
-    python scripts/eval_coco.py --data data/other.yaml --split test --detections ...
+    python scripts/eval_coco.py --data data/VisDrone.yaml --detections runs/yolo11s_640_val/detections.json
+    python scripts/eval_coco.py --data data/VisDrone.yaml --split test --detections ...
 """
 import argparse
 import contextlib
@@ -50,7 +50,7 @@ def read_data_yaml(path, split):
 
 parser = argparse.ArgumentParser(description="pycocotools evaluation of YOLO detections.")
 parser.add_argument("--detections", required=True, help="COCO results JSON")
-parser.add_argument("--data", default=str(ROOT / "data/VisDrone.yaml"), help="Ultralytics data YAML")
+parser.add_argument("--data", required=True, help="Ultralytics data YAML")
 parser.add_argument("--split", default="val", help="split key in the YAML (val, test)")
 parser.add_argument("--images", help="override the image folder from the YAML")
 parser.add_argument("--labels", help="override the label folder from the YAML")

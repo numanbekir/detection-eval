@@ -17,10 +17,6 @@ dev = [
     "pycocotools>=2.0.11",
     "pytest>=8",
 ]
-onnx = [
-    "onnxruntime>=1.23.2",
-]
-train = ["ultralytics==8.4.175"]
 
 [build-system]
 requires = ["hatchling"]

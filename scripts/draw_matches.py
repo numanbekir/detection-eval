@@ -1,12 +1,12 @@
 """Draw true positives, false positives and missed objects on one image.
 
-Reads the ground truth and detections JSON written by eval_coco.py / predict_coco.py,
+Reads ground_truth.json (written by eval_coco.py) and detections.json (COCO results) from one folder,
 keeps detections above a score threshold, matches them class by class with
 detection_eval.matching (IoU >= 0.5) and colours the boxes:
     green  = true positive    red = false positive    orange = missed (false negative)
 
 Usage:
-    python scripts/draw_matches.py --run runs/coco_eval/yolo11s_640_val --image 0000001_02999_d_0000005.jpg
+    python scripts/draw_matches.py --run runs/yolo11s_640_val --images data/VisDrone/images/val
 """
 import argparse
 import json
@@ -26,7 +26,7 @@ COLOURS = {"tp": (30, 200, 70), "fp": (230, 40, 40), "fn": (255, 150, 0)}
 parser = argparse.ArgumentParser(description="Draw TP / FP / FN boxes on one image.")
 parser.add_argument("--run", required=True, help="folder with ground_truth.json and detections.json")
 parser.add_argument("--image", help="file name; default: the image with the most ground truth boxes")
-parser.add_argument("--images", default=str(ROOT / "data/VisDrone/images/val"))
+parser.add_argument("--images", required=True, help="image folder of the evaluated split")
 parser.add_argument("--score", type=float, default=0.3, help="keep detections with score >= this")
 args = parser.parse_args()
 
