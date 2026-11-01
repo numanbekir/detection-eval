@@ -22,6 +22,8 @@ def match_predictions(pred_boxes, pred_scores, gt_boxes, iou_threshold=0.5):
     Returns:
         (N,) int array in the input order: the index of the matched ground
         truth box for a true positive, or -1 for a false positive.
+        A prediction takes the free ground truth box with the highest IoU;
+        if several have the same IoU, the last of them.
     """
     pred_scores = np.asarray(pred_scores, dtype=np.float64)
     n = len(pred_scores)
@@ -44,7 +46,9 @@ def match_predictions(pred_boxes, pred_scores, gt_boxes, iou_threshold=0.5):
         # Taken ground truth boxes get IoU -1 so argmax can never pick them.
         row = np.where(gt_taken, -1.0, ious[i])
 
-        j = row.argmax()
+        # On equal IoU the last ground truth box wins, as in pycocotools
+        # (its loop only skips a box whose IoU is lower, so a tie replaces).
+        j = len(row) - 1 - row[::-1].argmax()
         if row[j] >= iou_threshold:
             gt_taken[j] = True
             matched_gt[i] = j

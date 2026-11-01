@@ -92,7 +92,7 @@ ve precision zarfının 101 recall eşiğindeki ortalamasını al.
 
 ```bash
 uv sync                  # numpy, pillow, pyyaml + pycocotools, pytest
-uv run pytest -q         # 86 test
+uv run pytest -q         # 87 test
 ```
 
 Ultralytics data YAML'ı olan her YOLO formatlı veri setiyle çalışır. Tespitler bir COCO results

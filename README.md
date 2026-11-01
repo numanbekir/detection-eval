@@ -91,7 +91,7 @@ Requires [uv](https://docs.astral.sh/uv/).
 
 ```bash
 uv sync                  # numpy, pillow, pyyaml + pycocotools, pytest
-uv run pytest -q         # 86 tests
+uv run pytest -q         # 87 tests
 ```
 
 Any YOLO-format dataset with an Ultralytics data YAML works. Detections are a COCO results JSON

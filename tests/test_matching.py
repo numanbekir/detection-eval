@@ -28,6 +28,16 @@ def test_score_decides_who_matches_first():
     assert matched.tolist() == [0, -1]
 
 
+def test_equal_iou_goes_to_the_last_gt():
+    # The 0.9 box overlaps two GT boxes by exactly the same IoU (2/3 each).
+    # pycocotools gives it the last of them, which leaves the first one free
+    # for the 0.8 box. Taking the first one instead would make 0.8 a false positive.
+    gts = [[0, 0, 10, 10], [5, 0, 15, 10]]
+    boxes = [[0, 0, 15, 10], [0, 0, 10, 10]]
+    matched = match_predictions(boxes, [0.9, 0.8], gts)
+    assert matched.tolist() == [1, 0]
+
+
 def test_iou_exactly_at_threshold_is_a_match():
     matched = match_predictions([[0, 0, 10, 5]], [0.9], [GT_A], iou_threshold=0.5)
     assert matched.tolist() == [0]
